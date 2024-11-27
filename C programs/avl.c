@@ -119,10 +119,10 @@ myNode deleteNode(myNode root,int key){
 
 
 void main(){
-    const char* filename = "case1.txt";
+    const char* filename = "case4.txt";
     myNode root = insertFromFile(filename);
     inorder(root);    
-    if(search(root, 40) == 1) {
+    if(search(root, 3) == 1) {
         printf("\nKey found\n");
     } else {
         printf("\nKey not found\n");
