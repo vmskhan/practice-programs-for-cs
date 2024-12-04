@@ -1,3 +1,4 @@
+//have to create recursive only bst 3
 #include<stdio.h>
 #include<stdlib.h>
 
@@ -77,45 +78,44 @@ int getInorderSuccessor(myNode root){
     
 }
 
-myNode deleteNode(myNode root,int key){
-    if(root==NULL)
+void deleteNode(myNode* root,int key){
+    if(*root==NULL)
     {
         printf("Key Element %d not found\n",key);
-        return root;
+        // return root;
     }
-    else if(root->data==key)
+    else if((*root)->data==key)
     {
-        if(root->left==NULL && root->right==NULL)
+        if((*root)->left==NULL && (*root)->right==NULL)
         {
-            free(root);
-            return NULL;
+            free(*root);
+            *root=NULL;
         }
-        else if(root->left==NULL){
-            myNode temp=root->right;
-            free(root);
-            return temp;
+        else if((*root)->left==NULL){
+            myNode temp=(*root)->right;
+            free(*root);
+            *root=temp;
         }
-        else if(root->right==NULL)
+        else if((*root)->right==NULL)
         {
-            myNode temp=root->left;
-            free(root);
-            return temp;
+            myNode temp=(*root)->left;
+            free(*root);
+            *root=temp;
         }
         else{
-            root->data=getInorderSuccessor(root->right);
-            root->right=deleteNode(root->right,root->data);
+            (*root)->data=getInorderSuccessor((*root)->right);
+            deleteNode(&(*root)->right,(*root)->data);
         }
     }
-    else if(key<root->data)
+    else if(key<(*root)->data)
     {
-        root->left=deleteNode(root->left,key);
+        deleteNode(&(*root)->left,key);
     }
     else{
-        root->right=deleteNode(root->right,key);
+        deleteNode(&(*root)->right,key);
     }
-    return root;
+    
 }
-
 
 
 void main(){
@@ -127,6 +127,6 @@ void main(){
     } else {
         printf("\nKey not found\n");
     }
-    deleteNode(root,5);
+    deleteNode(&root,5);
     inorder(root);
 }
