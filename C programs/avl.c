@@ -39,10 +39,11 @@ void rightRotate(myNode* x){
 
     (*x)->left = y->right;
     y->right = *x;
-    *x=y;
+   
 
     (*x)->height = getMaxSubtreeHeight(*x) + 1;
     y->height = getMaxSubtreeHeight(y) + 1;
+     *x=y;
 }
 
 void leftRotate(myNode* x){
@@ -50,61 +51,48 @@ void leftRotate(myNode* x){
 
     (*x)->right = y->left;
     y->left = *x;
-    *x=y;
+    
 
     (*x)->height = getMaxSubtreeHeight(*x) + 1;
     y->height = getMaxSubtreeHeight(y) + 1;
+    *x=y;
 }
 
 
 void insert(myNode* root, int ele){
-    printf("a");
+
     if(*root == NULL){
-        printf("b");
         *root=createNode(ele);
         return;
     }
     else if(ele < (*root)->data){
-        printf("b");
         insert(&(*root)->left,ele);
     }
     else if(ele > (*root)->data){
-        printf("c");
         insert(&(*root)->right,ele);
     }
-    printf("d");
+    
     (*root)->height=getMaxSubtreeHeight(*root)+1;
     int balanceFactor=getBalanceFactor(*root);
-    printf("e");
+    
     if(balanceFactor>1 && (*root)->left->data>ele) //LL
     {
-        printf("f");
         rightRotate(root);
-        printf("g");
     }
     else if(balanceFactor<-1 && (*root)->right->data<ele) //RR
     {
-        printf("h");
         leftRotate(root);
-        printf("i");
     }
     else if(balanceFactor>1 && (*root)->left->data<ele) //LR
     {
-        printf("j");
         leftRotate(&(*root)->left);
-        printf("k");
         rightRotate(root);
-        printf("l");
     }
     else if(balanceFactor<-1 && (*root)->right->data>ele) //RL
     {
-        printf("m");
         rightRotate(&(*root)->right);
-        printf("n");
         leftRotate(root);
-        printf("o");
     }
-    printf("p");
 }
 
 int search(myNode root, int key){
@@ -143,10 +131,8 @@ myNode insertFromFile(const char* filename) {
     myNode root = NULL;
     int num;
     while (fscanf(file, "%d", &num) == 1) {
-        printf("Scanned number: %d\n", num);
-        printf("hai");
+        //printf("Scanned number: %d\n", num);
         insert(&root, num);
-        inorder(root);
     }
 
     fclose(file);
@@ -224,13 +210,14 @@ void deleteNode(myNode* root,int key){
 
 
 void main(){
-    const char* filename = "case3a.txt";
+    const char* filename = "case1.txt";
     myNode root = insertFromFile(filename);
     inorder(root);    
-    if(search(root, 3) == 1) {
-        printf("\nKey found\n");
+    int key=3;
+    if(search(root, key) == 1) {
+        printf("\nKey %d found\n",key);
     } else {
-        printf("\nKey not found\n");
+        printf("\nKey %d found\n",key);
     }
     deleteNode(&root,5);
     inorder(root);
