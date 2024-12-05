@@ -1,23 +1,28 @@
-/** C implementation for 
-    Red-Black Tree Insertion
-    This code is provided by 
-    costheta_z **/
+
 #include <stdio.h>
 #include <stdlib.h>
- 
-// Structure to represent each 
-// node in a red-black tree
+#include<time.h>
+
 struct node {
-    int d; // data
+    int d; 
     int c; // 1-red, 0-black
-    struct node* p; // parent
-    struct node* r; // right-child
-    struct node* l; // left child
+    struct node* p; 
+    struct node* r; 
+    struct node* l; 
 };
- 
-// global root for the entire tree
+
 struct node* root = NULL;
  
+struct node* createNode(int ele){
+    struct node* temp
+            = (struct node*)malloc(sizeof(struct node));
+        temp->r = NULL;
+        temp->l = NULL;
+        temp->p = NULL;
+        temp->d = ele;
+        temp->c = 1;
+    return temp;
+}
 // function to perform BST insertion of a node
 struct node* bst(struct node* trav, 
                       struct node* temp)
@@ -27,7 +32,7 @@ struct node* bst(struct node* trav,
     if (trav == NULL)
         return temp;
  
-    // Otherwise recur down the tree
+  
     if (temp->d < trav->d) 
     {
         trav->l = bst(trav->l, temp);
@@ -39,12 +44,11 @@ struct node* bst(struct node* trav,
         trav->r->p = trav;
     }
  
-    // Return the (unchanged) node pointer
+    
     return trav;
 }
  
-// Function performing right rotation 
-// of the passed node
+
 void rightrotate(struct node* temp)
 {
     struct node* left = temp->l;
@@ -62,8 +66,7 @@ void rightrotate(struct node* temp)
     temp->p = left;
 }
  
-// Function performing left rotation 
-// of the passed node
+
 void leftrotate(struct node* temp)
 {
     struct node* right = temp->r;
@@ -81,8 +84,7 @@ void leftrotate(struct node* temp)
     temp->p = right;
 }
  
-// This function fixes violations 
-// caused by BST insertion
+
 void fixup(struct node* root, struct node* pt)
 {
     struct node* parent_pt = NULL;
@@ -176,8 +178,17 @@ void fixup(struct node* root, struct node* pt)
     }
 }
  
-// Function to print inorder traversal 
-// of the fixated tree
+void search(struct node* rootNode,int key){
+	if(root==NULL)
+		printf("Key %d is not present in tree\n",key);
+	else if(rootNode->d==key)
+		printf("Key %d has been found\n",key);
+	else if(key<rootNode->d)
+		search(rootNode->l,key);
+	else
+		search(rootNode->r,key);
+}
+
 void inorder(struct node* trav)
 {
     if (trav == NULL)
@@ -187,38 +198,50 @@ void inorder(struct node* trav)
     inorder(trav->r);
 }
  
+void inputFromFile(const char* filename){
+	FILE* fptr=fopen(filename,"r");
+	int num=0;
+	if(fptr==NULL){
+		printf("Unable to open file");
+		exit(0);
+	}
+	while(fscanf(fptr,"%d",&num)==1){
+		struct node* temp=createNode(num);
+        root = bst(root, temp);
+        fixup(root, temp);
+        root->c = 0;
+	}
+}
+
 // driver code
 int main()
 {
-    int n = 7;
-    int a[7] = { 7, 6, 5, 4, 3, 2, 1 };
+    struct timespec startTime,endTime;
+	double timeTaken;
+
+	clock_gettime(CLOCK_MONOTONIC,&startTime);
+    inputFromFile("case10.txt");
+    clock_gettime(CLOCK_MONOTONIC,&endTime);
+    
+    timeTaken=(endTime.tv_sec-startTime.tv_sec)*1e6+(endTime.tv_nsec-startTime.tv_nsec)/1e3;
+	printf("\nTime taken for inserting is %lf microseconds\n",timeTaken);
  
-    for (int i = 0; i < n; i++) {
  
-        // allocating memory to the node and initializing:
-        // 1. color as red
-        // 2. parent, left and right pointers as NULL
-        // 3. data as i-th value in the array
-        struct node* temp
-            = (struct node*)malloc(sizeof(struct node));
-        temp->r = NULL;
-        temp->l = NULL;
-        temp->p = NULL;
-        temp->d = a[i];
-        temp->c = 1;
- 
-        // calling function that performs bst insertion of
-        // this newly created node
-        root = bst(root, temp);
- 
-        // calling function to preserve properties of rb
-        // tree
-        fixup(root, temp);
-          root->c = 0;
-    }
- 
-    printf("Inorder Traversal of Created Tree\n");
+    printf("Inorder sequence of the tree\n");
+
+    clock_gettime(CLOCK_MONOTONIC,&startTime);
     inorder(root);
+    clock_gettime(CLOCK_MONOTONIC,&endTime);
+
+    timeTaken=(endTime.tv_sec-startTime.tv_sec)*1e6+(endTime.tv_nsec-startTime.tv_nsec)/1e3;
+	printf("\nTime taken for inorder traversal is %lf microseconds\n",timeTaken);
+    
+    clock_gettime(CLOCK_MONOTONIC,&startTime);
+	search(root,60);
+	clock_gettime(CLOCK_MONOTONIC,&endTime);
+	
+	timeTaken=(endTime.tv_sec-startTime.tv_sec)*1e6+(endTime.tv_nsec-startTime.tv_nsec)/1e3;
+	printf("\nTime taken for searching is %lf microseconds\n",timeTaken);
  
     return 0;
 }
