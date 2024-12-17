@@ -1,6 +1,7 @@
 //have to create recursive only bst 3
 #include<stdio.h>
 #include<stdlib.h>
+#include<time.h>
 
 struct Node{
     int data;
@@ -119,14 +120,46 @@ void deleteNode(myNode* root,int key){
 
 
 void main(){
-    const char* filename = "case1.txt";
-    myNode root = insertFromFile(filename);
-    inorder(root);    
-    if(search(root, 40) == 1) {
+    const char* filename = "case10.txt";
+    int result=0;
+    int key=40;  
+    struct timespec startTime,endTime;
+	double timeTaken;
+
+	clock_gettime(CLOCK_MONOTONIC,&startTime);
+	myNode root=inputFromFile(filename);
+	clock_gettime(CLOCK_MONOTONIC,&endTime);
+	
+	timeTaken=(endTime.tv_sec-startTime.tv_sec)*1e6+(endTime.tv_nsec-startTime.tv_nsec)/1e3;
+	printf("\nTime taken for inserting is %lf microseconds\n",timeTaken);
+	
+	clock_gettime(CLOCK_MONOTONIC,&startTime);
+	result=search(root,key);
+	clock_gettime(CLOCK_MONOTONIC,&endTime);
+	
+    if(result == 1) {
         printf("\nKey found\n");
     } else {
         printf("\nKey not found\n");
     }
-    deleteNode(&root,5);
-    inorder(root);
+
+	timeTaken=(endTime.tv_sec-startTime.tv_sec)*1e6+(endTime.tv_nsec-startTime.tv_nsec)/1e3;
+	printf("\nTime taken for searching is %lf microseconds\n",timeTaken);
+	
+	printf("Inorder sequence is:\n");
+	clock_gettime(CLOCK_MONOTONIC,&startTime);
+	inorder(root);
+	clock_gettime(CLOCK_MONOTONIC,&endTime);
+	printf("\n");
+		
+	timeTaken=(endTime.tv_sec-startTime.tv_sec)*1e6+(endTime.tv_nsec-startTime.tv_nsec)/1e3;
+	printf("\nTime taken for inorder traversal is %lf microseconds\n",timeTaken);
+
+	clock_gettime(CLOCK_MONOTONIC,&startTime);		
+	deleteNode(&root,key);
+	clock_gettime(CLOCK_MONOTONIC,&endTime);
+	
+	timeTaken=(endTime.tv_sec-startTime.tv_sec)*1e6+(endTime.tv_nsec-startTime.tv_nsec)/1e3;
+	printf("\nTime taken for deleting is %lf microseconds\n",timeTaken);
+	printf("\n");
 }

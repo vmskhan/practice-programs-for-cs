@@ -210,15 +210,50 @@ void deleteNode(myNode* root,int key){
 
 
 void main(){
-    const char* filename = "case1.txt";
-    myNode root = insertFromFile(filename);
-    inorder(root);    
-    int key=3;
-    if(search(root, key) == 1) {
-        printf("\nKey %d found\n",key);
-    } else {
-        printf("\nKey %d found\n",key);
-    }
-    deleteNode(&root,5);
-    inorder(root);
+  
+     const char* filename = "case40.txt";
+     int key=40;
+     int result=0;
+     struct timespec start, end;
+     double time_taken;
+     
+     clock_gettime(CLOCK_MONOTONIC, &start);
+     myNode root = insertFromFile(filename);
+	 clock_gettime(CLOCK_MONOTONIC, &end);
+	 time_taken = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+	 printf("\nTime taken for insertion: %lf microseconds\n", time_taken);
+	 
+	 
+     printf("Inorder Traversal: ");
+     clock_gettime(CLOCK_MONOTONIC, &start);
+     inorder(root);
+   	 clock_gettime(CLOCK_MONOTONIC, &end);
+     printf("\n");
+     
+   	 time_taken = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+	 printf("\nTime taken for inoder traversal: %lf microseconds\n", time_taken);
+
+	
+	 clock_gettime(CLOCK_MONOTONIC, &start);
+     result=search(root, key);
+     clock_gettime(CLOCK_MONOTONIC, &end);
+     
+     if (result) {
+         printf("\nKey %d found",key);
+     } else {
+         printf("\nKey %d not found",key);
+     }
+
+     time_taken = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+     printf("\nTime taken for searching: %lf microseconds\n", time_taken);
+
+     
+     clock_gettime(CLOCK_MONOTONIC, &start);
+     deleteNode(&root,key);
+	 clock_gettime(CLOCK_MONOTONIC, &end);
+	 
+     time_taken = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
+     printf("\nTime taken for deletion: %lf microseconds\n", time_taken);
+     
+     return 0;
 }

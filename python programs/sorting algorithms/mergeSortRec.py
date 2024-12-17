@@ -4,8 +4,8 @@ def mergeSort(arr,left,right):
     mid=(left+right)//2
     mergeSort(arr,left,mid)
     mergeSort(arr,mid+1,right)    
-    return mergeElements(arr,left,mid,right)
-
+    mergeElements(arr,left,mid,right)
+    # return mergeElements(arr,left,mid,right)
 
 def mergeElements(arr,left,mid,right):
     temp=[]
@@ -26,9 +26,10 @@ def mergeElements(arr,left,mid,right):
         j=j+1
     
     arr[:]=arr[0:left]+temp+arr[right+1:]
-    return arr
+    # return arr
 
 if __name__=="__main__":
     nums=[6, 25, 3, 12, 15,5,24,4,13]
-    nums=mergeSort(nums,0,len(nums)-1)
+    # nums=mergeSort(nums,0,len(nums)-1)
+    mergeSort(nums,0,len(nums)-1)
     print(nums)

@@ -1,15 +1,8 @@
 def insertionSort(arr):
     for i in range(1,len(arr)):
-        temp=arr[i]
-        j=i-1
-        for j in range(i-1,-1,-1):
-            if(arr[j]>temp):
-                arr[j+1]=arr[j]
-            else:
-                break
-        else:
-            j=j-1
-        arr[j+1]=temp
+        for j in range(i,0,-1):
+            if(arr[j-1]>arr[j]):
+                arr[j-1],arr[j]=arr[j],arr[j-1]
     return arr
 
 if __name__=="__main__":

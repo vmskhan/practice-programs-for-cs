@@ -1,4 +1,3 @@
-//find if delete can be done without returning anyting and no double pointer
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
