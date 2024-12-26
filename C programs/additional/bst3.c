@@ -1,5 +1,4 @@
-// BST implementation using recursion and returning pointer in recursive function
-// Only insert function has two versions--- one does not return anything in recursion ---- and the other returns a pointer
+// BST iterative implementation using prev and curr pointers
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
@@ -21,23 +20,33 @@ myNode createNode(int ele){
 }
 
 void insertNode(myNode root,int ele){
-	if(root->data==ele){
-		return;
-	}
-	else if(ele<root->data)
-	{
-		if(root->left!=NULL)
-			insertNode(root->left,ele);
-		else
-			root->left=createNode(ele);
-	}
-	else
-	{
-		if(root->right!=NULL)
-			insertNode(root->right,ele);
-		else
-			root->right=createNode(ele);	
-	}
+    myNode curr=root;
+    myNode prev=root;
+    bool isLeft=0; //0 is false and 1 is true
+    while(curr!=NULL)
+    {
+        prev=curr;
+        if(curr->data==ele)
+		    break;
+        else if(ele<curr->data)
+        {
+            curr=curr->left;
+            isLeft=1;
+        }
+        else
+        {
+            curr=curr->right;
+            isLeft=0;
+        }
+    }
+	if(curr==NULL)
+    {
+        if(isLeft)
+            prev->left=createNode(ele);
+        else
+            prev->right=createNode(ele);
+    }	
+	
 }
 
 void inorderTraversal(myNode root){
@@ -49,15 +58,20 @@ void inorderTraversal(myNode root){
 	inorderTraversal(root->right);
 }
 
-void search(myNode root,int key){
-	if(root==NULL)
+void search(myNode root,int key){	
+    while(root!=NULL)
+    {
+        if(root->data==ele)
+		    break;
+        else if(ele<root->data)
+            curr=root->left;
+        else
+            curr=root->right;
+    }
+    if(root==NULL)
 		printf("Key %d is not present in tree\n",key);
 	else if(root->data==key)
 		printf("Key %d has been found\n",key);
-	else if(key<root->data)
-		search(root->left,key);
-	else
-		search(root->right,key);
 }
 
 int minValue(myNode root){
@@ -67,44 +81,52 @@ int minValue(myNode root){
 		minValue(root->left);
 }
 
-myNode deleteNode(myNode root,int key){
-	if(root==NULL){
+void deleteNode(myNode root,int key){
+    myNode curr=root;
+    myNode prev=root;
+    myNode temp=NULL;
+    bool isLeft=0;
+    while(curr!==null)
+    {
+        if(curr->data==ele)
+        {
+            if(curr->left==NULL && curr->right==NULL)
+            {
+                temp=NULL;
+                free(curr);
+            }
+            else if(curr->left==NULL)
+            {
+                temp=root->right;
+                free(curr);
+            }
+            else if(curr->right==NULL)
+            {
+                temp=root->left;
+                free(curr);
+            }
+            else
+            {	
+                curr->data=minValue(curr->right);
+                curr->right=deleteNode(curr->right,curr->data);
+                temp=curr;
+            }
+        }
+        else if(ele<curr->data){
+            prev=curr;
+            isLeft=1;
+            curr=curr->left;
+        }
+        else{
+            prev=curr;
+            isLeft=0;
+            curr=curr->right;
+        }
+    }
+	if(curr==NULL)
 		printf("Key not found. Delete unsucessful\n");
-		return NULL;
-	}
-	else if(root->data==key)
-	{
-		if(root->left==NULL && root->right==NULL)
-		{
-			free(root);
-			return NULL;
-		}
-		else if(root->left==NULL)
-		{
-			struct Node* right=root->right;
-			free(root);
-			return right;
-		}
-		else if(root->right==NULL)
-		{
-			struct Node* left=root->left;
-			free(root);
-			return left;
-		}
-		else
-		{	
-			root->data=minValue(root->right);
-			root->right=deleteNode(root->right,root->data);
-			return root;
-		}
-		printf("Key %d found. Delete sucessful\n",key);
-	
-	}
-	else if(key<root->data)
-		root=deleteNode(root->left,key);
 	else
-		root=deleteNode(root->right,key);
-	return root;
+		printf("Key %d found. Delete sucessful\n",key);
 }
 
 myNode inputFromFile(const char* filename){
@@ -122,7 +144,7 @@ myNode inputFromFile(const char* filename){
 			root=createNode(num);
 		else
 			insertNode(root,num);
-	//root=insertNode(root,num);
+		//root=insertNode(root,num);
 		firstTime=false;
 	}
 	return root;
@@ -170,39 +192,3 @@ int main(){
 	printf("\n");
 	return 0;
 }
-
-// myNode insertNode(myNode root,int ele){
-// 	if(root==NULL){
-// 		return createNode(ele);
-// 	}
-// 	else if(root->data==ele){
-// 		return root;
-// 	}
-// 	else if(ele<root->data)
-// 	{
-// 		root->left=insertNode(root->left,ele);
-// 	}
-// 	else
-// 	{
-// 		root->right=insertNode(root->right,ele);
-// 	}
-// }
-
-/*myNode randomInputCase1(){
-	int num=0;
-	int N=1000;
-	bool firstTime=true;
-	myNode root=NULL;
-
-	for(int i=0;i<1000;i++){
-		num=rand()%(N-1);
-		printf("%d ",num);
-		if(firstTime)
-			root=createNode(num);
-		else
-			insertNode(root,num);
-		firstTime=false;
-	}
-	return root;
-}*/
-

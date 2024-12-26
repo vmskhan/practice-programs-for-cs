@@ -1,4 +1,4 @@
-//have to create recursive only bst 3
+// BST implementation using double pointers and recursion without returning anything in recursive function
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
@@ -33,7 +33,7 @@ int search(myNode root, int key){
     if(root == NULL){
         return 0;
     }
-    if(root->data == key){
+    else if(root->data == key){
         return 1;
     }
     else if(root->data > key){
