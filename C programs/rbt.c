@@ -4,6 +4,7 @@
 #include<stdlib.h>
 #include<time.h>
 #include<stdbool.h>
+#include<math.h>
 
 struct Node{
 	int data;
@@ -105,15 +106,25 @@ void insertNode(myNode root,int ele){
                 {
                     rightRotate(root->parent);
                     //recolour parent and grandparent
-                    root->colour=0;
+                    // if(root->parent!=NULL)
+                        // root->colour=(root->colour+1)%2;
+                        root->colour=0;
+                    // else
+                        // root->colour=(root->colour+1)%2;
                     root->right->colour=1;
+                    // root->right->colour=(root->right->colour+1)%2;
                 }
                 else  //LR
                 {
                     leftRotate(root);
                     rightRotate(root->parent->parent);
                     //recolour child and grandparent
-                    root->parent->colour=0;
+                    // if(root->parent->parent!=NULL)
+                        // root->parent->colour=(root->colour+1)%2;
+                        root->parent->colour=0;
+                    // else
+                        // root->parent->colour=0;
+                    // root->parent->right->colour=(root->right->colour+1)%2;
                     root->parent->right->colour=1;
 
                 }
@@ -247,8 +258,60 @@ myNode inputFromFile(const char* filename){
 	}
 	return root;
 }
+int getDepth(myNode root)
+{
+  if(root==NULL)
+    return 0;
+  int left=getDepth(root->left);
+  int right=getDepth(root->right);
+  return 1+(left>right?left:right);
+}
+void treePrinter(myNode root){
+   int depth=getDepth(root)-1;
+   int spaces=1;
+   if(depth==1)
+    spaces=3;
+    else if(depth>=2)
+      spaces=pow(2,depth-1)*3;
+    printf("%d %d",depth,spaces);
+    
+  
+}
 
+void currentlevel(myNode root, int level)
+{
+    if (root != NULL) 
+    {
+        if (level == 1)
+        {
+            printf("%d", root->data);
+            if(root->colour)
+              printf("R ");
+            else
+              printf("B ");
+        }
+        else if (level > 1) 
+        { 
+            currentlevel(root->left, level-1); 
+            currentlevel(root->right, level-1);
+        }			
+    }
+    else{
+      printf("Nl ");
+    }
+}
 
+void levelOrder(myNode root){
+  
+   int depth=getDepth(root);
+    /* Calling current level function, by passing levels one by one. */
+    printf("\n");
+    for(int i = 1; i <= depth; i++)      
+    {
+        currentlevel(root,i);
+        printf("\n");
+    }
+}
 
 int main(){
 	struct timespec startTime,endTime;
@@ -278,6 +341,8 @@ int main(){
 	timeTaken=(endTime.tv_sec-startTime.tv_sec)*1e6+(endTime.tv_nsec-startTime.tv_nsec)/1e3;
 	printf("\nTime taken for inorder traversal is %lf microseconds\n",timeTaken);
 
+  // treePrinter(root);
+  levelOrder(root);
 // 	clock_gettime(CLOCK_MONOTONIC,&startTime);		
 // 	deleteNode(root,5);
 // 	clock_gettime(CLOCK_MONOTONIC,&endTime);
