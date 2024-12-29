@@ -1,4 +1,5 @@
 // BST iterative implementation using prev and curr pointers
+//deleteNOde implementation not complete
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
@@ -90,19 +91,9 @@ void deleteNode(myNode root,int key){
     {
         if(curr->data==ele)
         {
-            if(curr->left==NULL && curr->right==NULL)
+            if(curr->left==NULL || curr->right==NULL)
             {
-                temp=NULL;
-                free(curr);
-            }
-            else if(curr->left==NULL)
-            {
-                temp=root->right;
-                free(curr);
-            }
-            else if(curr->right==NULL)
-            {
-                temp=root->left;
+                temp=curr->left!=NULL?curr->left:curr->right;
                 free(curr);
             }
             else

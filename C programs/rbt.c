@@ -1,5 +1,6 @@
 // BST implementation using recursion and returning pointer in recursive function
 // Only insert function has two versions--- one does not return anything in recursion ---- and the other returns a pointer
+//Have to work on delete function and then optimize and reduce code
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
@@ -61,6 +62,7 @@ void leftRotate(myNode x){
 }
 
 
+
 void insertNode(myNode root,int ele){
 	if(root->data==ele){
 		return;
@@ -91,14 +93,11 @@ void insertNode(myNode root,int ele){
             if(root->parent->right!=NULL && root->parent->right->colour==1) //red sibling
             {
                 //recolour parent, sibling, and grandparent(if not root)
-
                 root->colour=0;
                 root->parent->right->colour=0;
                 if(root->parent->parent!=NULL)
-                {
                     root->parent->colour=1;
                     // root->parent->colour=(root->parent->colour+1)%2;
-                }
             }
             else{ //black sibling or null sibling
                 //reorganize using rotation (LL or LR)  and recolour
@@ -106,27 +105,16 @@ void insertNode(myNode root,int ele){
                 {
                     rightRotate(root->parent);
                     //recolour parent and grandparent
-                    // if(root->parent!=NULL)
-                        // root->colour=(root->colour+1)%2;
-                        root->colour=0;
-                    // else
-                        // root->colour=(root->colour+1)%2;
+                    root->colour=0;
                     root->right->colour=1;
-                    // root->right->colour=(root->right->colour+1)%2;
                 }
                 else  //LR
                 {
                     leftRotate(root);
                     rightRotate(root->parent->parent);
                     //recolour child and grandparent
-                    // if(root->parent->parent!=NULL)
-                        // root->parent->colour=(root->colour+1)%2;
-                        root->parent->colour=0;
-                    // else
-                        // root->parent->colour=0;
-                    // root->parent->right->colour=(root->right->colour+1)%2;
+                    root->parent->colour=0;
                     root->parent->right->colour=1;
-
                 }
             }
         }
@@ -166,14 +154,80 @@ void insertNode(myNode root,int ele){
 
 }
 
+int minValue(myNode root){
+	if(root->left==NULL)
+		return root->data;
+	else
+		minValue(root->left);
+}
 
-void inorderTraversal(myNode root){
+
+int deleteNode(myNode root,int key){
 	if(root==NULL){
-		return;
+		return 0;
 	}
-	inorderTraversal(root->left);
-	printf("%d ",root->data);
-	inorderTraversal(root->right);
+	else if(root->data==key)
+	{
+		if(root->left==NULL || root->right==NULL)
+		{
+		  struct Node* temp=root->left==NULL?root->right:root->left;
+		  if(root->parent->left==root)
+		    root->parent->left=temp;
+		  else
+		      root->parent->right=temp;
+		  if(temp!=NULL)
+		    temp->parent=root->parent;
+			free(root);
+			return 1;
+		}
+		else
+		{	
+			root->data=minValue(root->right);
+			return deleteNode(root->right,root->data);
+		}
+	}
+	else if(key<root->data)
+		return deleteNode(root->left,key);
+	else
+		return deleteNode(root->right,key);
+		
+	
+}
+
+void treeInsertion(myNode* root,int ele){
+  if(*root==NULL)
+  {
+    *root=createNode(ele);
+    (*root)->colour=0;
+    
+  }
+  else
+    insertNode(*root,ele);
+  while((*root)->parent!=NULL)
+		  *root=(*root)->parent;
+}
+
+void treeDeletion(myNode* root,int key)
+{
+  int result=0;
+  if((*root)!=NULL && (*root)->data==key && (*root)->left==NULL && (*root)->right==NULL)
+  {
+    free(*root);
+    *root=NULL;
+    printf("Key %d found. Delete sucessful\n",key);
+    return;
+  }
+  else
+    result=deleteNode(*root,key);
+  
+  if(result)
+    printf("Key %d found. Delete sucessful\n",key);
+  else
+    printf("Key not found. Delete unsucessful\n");
+    
+  while((*root)->parent!=NULL)
+		  *root=(*root)->parent;
+    
 }
 
 void search(myNode root,int key){
@@ -187,77 +241,17 @@ void search(myNode root,int key){
 		search(root->right,key);
 }
 
-int minValue(myNode root){
-	if(root->left==NULL)
-		return root->data;
-	else
-		minValue(root->left);
-}
 
-myNode deleteNode(myNode root,int key){
+void inorderTraversal(myNode root){
 	if(root==NULL){
-		printf("Key not found. Delete unsucessful\n");
-		return NULL;
+		return;
 	}
-	else if(root->data==key)
-	{
-		if(root->left==NULL && root->right==NULL)
-		{
-			free(root);
-			return NULL;
-		}
-		else if(root->left==NULL)
-		{
-			struct Node* right=root->right;
-			free(root);
-			return right;
-		}
-		else if(root->right==NULL)
-		{
-			struct Node* left=root->left;
-			free(root);
-			return left;
-		}
-		else
-		{	
-			root->data=minValue(root->right);
-			root->right=deleteNode(root->right,root->data);
-			return root;
-		}
-		printf("Key %d found. Delete sucessful\n",key);
-	
-	}
-	else if(key<root->data)
-		root=deleteNode(root->left,key);
-	else
-		root=deleteNode(root->right,key);
-	return root;
+	inorderTraversal(root->left);
+	printf("%d ",root->data);
+	inorderTraversal(root->right);
 }
 
-myNode inputFromFile(const char* filename){
-	FILE* fptr=fopen(filename,"r");
-	int num=0;
-	bool firstTime=true;
-	myNode root=NULL;
-	if(fptr==NULL){
-		printf("Unable to open file");
-		exit(0);
-		return NULL;
-	}
-	while(fscanf(fptr,"%d",&num)==1){
-		if(firstTime){
-			root=createNode(num);
-			root->colour=0;
-		}
-		else{
-			insertNode(root,num);    
-		}
-		while(root->parent!=NULL)
-		  root=root->parent;
-		firstTime=false;
-	}
-	return root;
-}
+
 int getDepth(myNode root)
 {
   if(root==NULL)
@@ -266,17 +260,17 @@ int getDepth(myNode root)
   int right=getDepth(root->right);
   return 1+(left>right?left:right);
 }
-void treePrinter(myNode root){
-   int depth=getDepth(root)-1;
-   int spaces=1;
-   if(depth==1)
-    spaces=3;
-    else if(depth>=2)
-      spaces=pow(2,depth-1)*3;
-    printf("%d %d",depth,spaces);
+// void treePrinter(myNode root){
+//   int depth=getDepth(root)-1;
+//   int spaces=1;
+//   if(depth==1)
+//     spaces=3;
+//     else if(depth>=2)
+//       spaces=pow(2,depth-1)*3;
+//     printf("%d %d",depth,spaces);
     
   
-}
+// }
 
 void currentlevel(myNode root, int level)
 {
@@ -313,6 +307,20 @@ void levelOrder(myNode root){
     }
 }
 
+myNode inputFromFile(const char* filename){
+	FILE* fptr=fopen(filename,"r");
+	int num=0;
+	myNode root=NULL;
+	if(fptr==NULL){
+		printf("Unable to open file");
+		exit(0);
+	}
+	while(fscanf(fptr,"%d",&num)==1)
+			treeInsertion(&root,num);   
+			
+	return root;
+}
+
 int main(){
 	struct timespec startTime,endTime;
 	double timeTaken;
@@ -342,7 +350,7 @@ int main(){
 	printf("\nTime taken for inorder traversal is %lf microseconds\n",timeTaken);
 
   // treePrinter(root);
-  levelOrder(root);
+  // levelOrder(root);
 // 	clock_gettime(CLOCK_MONOTONIC,&startTime);		
 // 	deleteNode(root,5);
 // 	clock_gettime(CLOCK_MONOTONIC,&endTime);

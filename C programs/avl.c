@@ -75,48 +75,53 @@ void insert(myNode* root, int ele){
     (*root)->height=getMaxSubtreeHeight(*root)+1;
     int balanceFactor=getBalanceFactor(*root);
     
-    if(balanceFactor>1 && (*root)->left->data>ele) //LL
+    if(balanceFactor>1)
     {
-        rightRotate(root);
+        if((*root)->left->data<ele)   //LR
+            leftRotate(&(*root)->left);
+        rightRotate(root); //LL
     }
-    else if(balanceFactor<-1 && (*root)->right->data<ele) //RR
+    else if(balanceFactor<-1)
     {
-        leftRotate(root);
+        if((*root)->right->data>ele)  //RL
+            rightRotate(&(*root)->right);
+        leftRotate(root);  //RR
     }
-    else if(balanceFactor>1 && (*root)->left->data<ele) //LR
-    {
-        leftRotate(&(*root)->left);
-        rightRotate(root);
-    }
-    else if(balanceFactor<-1 && (*root)->right->data>ele) //RL
-    {
-        rightRotate(&(*root)->right);
-        leftRotate(root);
-    }
+
+    // if(balanceFactor>1 && (*root)->left->data>ele) //LL
+    // {
+    //     rightRotate(root);
+    // }
+    // else if(balanceFactor<-1 && (*root)->right->data<ele) //RR
+    // {
+    //     leftRotate(root);
+    // }
+    // else if(balanceFactor>1 && (*root)->left->data<ele) //LR
+    // {
+    //     leftRotate(&(*root)->left);
+    //     rightRotate(root);
+    // }
+    // else if(balanceFactor<-1 && (*root)->right->data>ele) //RL
+    // {
+    //     rightRotate(&(*root)->right);
+    //     leftRotate(root);
+    // }
 }
 
 int search(myNode root, int key){
-    if(root == NULL){
+    if(root == NULL)
         return 0;
-    }
-    else if(root->data == key){
+    else if(root->data == key)
         return 1;
-    }
-    else if(root->data > key){
+    else if(root->data > key)
         return search(root->left,key);
-    }
     else 
-    //if(root->data < key)
-    {
         return search(root->right,key);
-    }
-    //return 0;
 }
 
 void inorder(myNode root){
-    if(root == NULL){
+    if(root == NULL)
         return;
-    }
     inorder(root->left);
     printf("%d ", root->data);
     inorder(root->right);
@@ -134,7 +139,6 @@ myNode insertFromFile(const char* filename) {
         //printf("Scanned number: %d\n", num);
         insert(&root, num);
     }
-
     fclose(file);
     return root;
 }
@@ -144,7 +148,6 @@ int getInorderSuccessor(myNode root){
         return root->data;
     else
         return getInorderSuccessor(root->left);
-    
 }
 
 void deleteNode(myNode* root,int key){

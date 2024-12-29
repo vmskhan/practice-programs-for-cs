@@ -1,13 +1,14 @@
 // BST implementation using recursion and returning pointer in recursive function
 // Only insert function has two versions--- one does not return anything in recursion ---- and the other returns a pointer
+//problem-unable to tell if delete was successful
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
 
 struct Node{
 	int data;
-	Node* left;
-	Node* right;
+	struct Node* left;
+	struct Node* right;
 };
 
 typedef struct Node* myNode;
@@ -15,8 +16,7 @@ typedef struct Node* myNode;
 myNode createNode(int ele){
 	myNode newNode=(myNode)malloc(sizeof(struct Node));
 	newNode->data=ele;
-	newNode->left=NULL;
-	newNode->right=NULL;
+	newNode->left=newNode->right=NULL;
 	return newNode;
 }
 
@@ -40,10 +40,17 @@ void insertNode(myNode root,int ele){
 	}
 }
 
+void treeInsertion(myNode* root,int ele)
+{
+	if((*root)==NULL)
+		*root=createNode(ele);
+	else
+		insertNode(*root,ele);
+}
+
 void inorderTraversal(myNode root){
-	if(root==NULL){
+	if(root==NULL)
 		return;
-	}
 	inorderTraversal(root->left);
 	printf("%d ",root->data);
 	inorderTraversal(root->right);
@@ -70,35 +77,39 @@ int minValue(myNode root){
 myNode deleteNode(myNode root,int key){
 	if(root==NULL){
 		printf("Key not found. Delete unsucessful\n");
-		return NULL;
 	}
 	else if(root->data==key)
 	{
-		if(root->left==NULL && root->right==NULL)
+		if(root->left==NULL || root->right==NULL) //no child and single child cases combined
 		{
+			struct Node* temp=root->left!=NULL?root->left:root->right;
 			free(root);
-			return NULL;
+			root=temp;
 		}
-		else if(root->left==NULL)
-		{
-			struct Node* right=root->right;
-			free(root);
-			return right;
-		}
-		else if(root->right==NULL)
-		{
-			struct Node* left=root->left;
-			free(root);
-			return left;
-		}
+
+		// if(root->left==NULL && root->right==NULL)
+		// {
+		// 	free(root);
+		// 	return NULL;
+		// }
+		// else if(root->left==NULL)
+		// {
+		// 	struct Node* right=root->right;
+		// 	free(root);
+		// 	return right;
+		// }
+		// else if(root->right==NULL)
+		// {
+		// 	struct Node* left=root->left;
+		// 	free(root);
+		// 	return left;
+		// }
 		else
 		{	
 			root->data=minValue(root->right);
 			root->right=deleteNode(root->right,root->data);
-			return root;
 		}
 		printf("Key %d found. Delete sucessful\n",key);
-	
 	}
 	else if(key<root->data)
 		root=deleteNode(root->left,key);
@@ -110,7 +121,6 @@ myNode deleteNode(myNode root,int key){
 myNode inputFromFile(const char* filename){
 	FILE* fptr=fopen(filename,"r");
 	int num=0;
-	bool firstTime=true;
 	myNode root=NULL;
 	if(fptr==NULL){
 		printf("Unable to open file");
@@ -118,17 +128,11 @@ myNode inputFromFile(const char* filename){
 		return NULL;
 	}
 	while(fscanf(fptr,"%d",&num)==1){
-		if(firstTime)
-			root=createNode(num);
-		else
-			insertNode(root,num);
-	//root=insertNode(root,num);
-		firstTime=false;
+			treeInsertion(&root,num);
+			// root=insertNode(root,num);
 	}
 	return root;
 }
-
-
 
 int main(){
 	struct timespec startTime,endTime;

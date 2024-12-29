@@ -10,6 +10,7 @@ struct Node{
 };
 
 typedef struct Node* myNode;
+
 myNode createNode(int data){
     struct Node* node = (struct Node*)malloc(sizeof(struct Node));
     node->data = data;
@@ -30,25 +31,19 @@ void insert(myNode* root, int data){
 }
 
 int search(myNode root, int key){
-    if(root == NULL){
+    if(root == NULL)
         return 0;
-    }
-    else if(root->data == key){
+    else if(root->data == key)
         return 1;
-    }
-    else if(root->data > key){
+    else if(key < root->data)
         return search(root->left,key);
-    }
-    else if(root->data < key){
+    else
         return search(root->right,key);
-    }
-    return 0;
 }
 
 void inorder(myNode root){
-    if(root == NULL){
+    if(root == NULL)
         return;
-    }
     inorder(root->left);
     printf("%d ", root->data);
     inorder(root->right);
@@ -63,10 +58,9 @@ myNode insertFromFile(const char* filename) {
     myNode root = NULL;
     int num;
     while (fscanf(file, "%d", &num) == 1) {
-        printf("Scanned number: %d\n", num);
+        // printf("Scanned number: %d\n", num);
         insert(&root, num);
     }
-
     fclose(file);
     return root;
 }
@@ -76,58 +70,41 @@ int getInorderSuccessor(myNode root){
         return root->data;
     else
         return getInorderSuccessor(root->left);
-    
 }
 
-void deleteNode(myNode* root,int key){
+int deleteNode(myNode* root,int key){
     if(*root==NULL)
-    {
-        printf("Key Element %d not found\n",key);
-        // return root;
-    }
+        return 0;
     else if((*root)->data==key)
     {
-        if((*root)->left==NULL && (*root)->right==NULL)
+        if((*root)->left==NULL || (*root)->right==NULL) //no child and single child cases combined
         {
-            free(*root);
-            *root=NULL;
-        }
-        else if((*root)->left==NULL){
-            myNode temp=(*root)->right;
+            myNode temp=(*root)->left!=NULL?(*root)->left:(*root)->right;
             free(*root);
             *root=temp;
-        }
-        else if((*root)->right==NULL)
-        {
-            myNode temp=(*root)->left;
-            free(*root);
-            *root=temp;
+            return 1;
         }
         else{
             (*root)->data=getInorderSuccessor((*root)->right);
-            deleteNode(&(*root)->right,(*root)->data);
+            return deleteNode(&(*root)->right,(*root)->data);
         }
     }
     else if(key<(*root)->data)
-    {
         deleteNode(&(*root)->left,key);
-    }
-    else{
+    else
         deleteNode(&(*root)->right,key);
-    }
-    
 }
 
 
 void main(){
-    const char* filename = "case10.txt";
+    const char* filename = "case40.txt";
     int result=0;
-    int key=40;  
+    int key=11;  
     struct timespec startTime,endTime;
 	double timeTaken;
 
 	clock_gettime(CLOCK_MONOTONIC,&startTime);
-	myNode root=inputFromFile(filename);
+	myNode root=insertFromFile(filename);
 	clock_gettime(CLOCK_MONOTONIC,&endTime);
 	
 	timeTaken=(endTime.tv_sec-startTime.tv_sec)*1e6+(endTime.tv_nsec-startTime.tv_nsec)/1e3;
@@ -137,11 +114,10 @@ void main(){
 	result=search(root,key);
 	clock_gettime(CLOCK_MONOTONIC,&endTime);
 	
-    if(result == 1) {
-        printf("\nKey found\n");
-    } else {
-        printf("\nKey not found\n");
-    }
+    if(result == 1)
+        printf("\nKey %d found. Search successful\n",key);
+    else
+        printf("\nKey %d not found. Search unsuccessful\n",key);
 
 	timeTaken=(endTime.tv_sec-startTime.tv_sec)*1e6+(endTime.tv_nsec-startTime.tv_nsec)/1e3;
 	printf("\nTime taken for searching is %lf microseconds\n",timeTaken);
@@ -159,6 +135,11 @@ void main(){
 	deleteNode(&root,key);
 	clock_gettime(CLOCK_MONOTONIC,&endTime);
 	
+	if(result)
+	  printf("\nKey Element %d successfully deleted\n",key);
+	else
+	  printf("\nKey Element %d not found. Delete unsuccessful\n",key);
+	  
 	timeTaken=(endTime.tv_sec-startTime.tv_sec)*1e6+(endTime.tv_nsec-startTime.tv_nsec)/1e3;
 	printf("\nTime taken for deleting is %lf microseconds\n",timeTaken);
 	printf("\n");
