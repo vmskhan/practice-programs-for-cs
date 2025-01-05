@@ -64,94 +64,75 @@ void leftRotate(myNode x){
 
 
 void insertNode(myNode root,int ele){
-	if(root->data==ele){
-		return;
-	}
-	
-	else if(ele<root->data)
-	{
-		if(root->left!=NULL)
-			insertNode(root->left,ele);
-		else{
-			root->left=createNode(ele);
-            root->left->parent=root;
-        }
-	}
-	
-	else
-	{
-		if(root->right!=NULL)
-			insertNode(root->right,ele);
-		else{
-			root->right=createNode(ele);	
-            root->right->parent=root;
-        }
-	}
+    	if(root->data==ele){
+    		return;
+    	}
+    	
+    	else if(ele<root->data)
+    	{
+    		if(root->left!=NULL)
+    			insertNode(root->left,ele);
+    		else{
+    			root->left=createNode(ele);
+                root->left->parent=root;
+            }
+    	}
+    	
+    	else
+    	{
+    		if(root->right!=NULL)
+    			insertNode(root->right,ele);
+    		else{
+    			root->right=createNode(ele);	
+                root->right->parent=root;
+            }
+    	}
+    	
      if(root->colour==1 && ((root->right!=NULL && root->right->colour==1) ||(root->left!=NULL && root->left->colour==1))){ // double red problem----here root is parent
-        if(root->parent->left==root)// root is left child
+        
+        bool isRootLeft=root->parent->left==root?true:false;
+        bool performedDoubleRotation=false;
+        myNode sibling=isRootLeft?root->parent->right:root->parent->left;
+        
+        if(sibling!=NULL && sibling->colour==1)//red sibling - recolour parent, sibling, and grandparent(if not root)
         {
-            if(root->parent->right!=NULL && root->parent->right->colour==1) //red sibling
-            {
-                //recolour parent, sibling, and grandparent(if not root)
-                root->colour=0;
-                root->parent->right->colour=0;
-                if(root->parent->parent!=NULL)
-                    root->parent->colour=1;
-                    // root->parent->colour=(root->parent->colour+1)%2;
-            }
-            else{ //black sibling or null sibling
-                //reorganize using rotation (LL or LR)  and recolour
-                if(ele<root->data) //LL
-                {
-                    rightRotate(root->parent);
-                    //recolour parent and grandparent
-                    root->colour=0;
-                    root->right->colour=1;
-                }
-                else  //LR
-                {
-                    leftRotate(root);
-                    rightRotate(root->parent->parent);
-                    //recolour child and grandparent
-                    root->parent->colour=0;
-                    root->parent->right->colour=1;
-                }
-            }
+          root->colour=0;
+          sibling->colour=0;
+          if(root->parent->parent!=NULL)
+              root->parent->colour=1;
         }
-        else{ // root is right child
-            if(root->parent->left!=NULL && root->parent->left->colour==1) //red sibling
-            {
-                //recolour parent, sibling, and grandparent(if not root)
-                root->colour=0;
-                root->parent->left->colour=0;
-                if(root->parent->parent!=NULL)
-                {
-                    root->parent->colour=1;
-                }
-            }
-            else{ //black sibling or null sibling
-                //reorganize using rotation (RR or RL)  and recolour
-                if(ele>root->data) //RR
-                {
-                    leftRotate(root->parent);
-                    //recolour parent and grandparent
-                    root->colour=0;
-                    root->left->colour=1;
-                }
-                else  //RL
-                {
-                    rightRotate(root);
-                    leftRotate(root->parent->parent);
-                    //recolour child and grandparent
-                    root->parent->colour=0;
-                    root->parent->left->colour=1;
+        else{//black sibling or null sibling -reorganize using rotation and recolour
+          myNode grandParent=root->parent;
+          myNode parent=root;
+          myNode child=ele<root->data?root->left:root->right;
 
+          //////////////////////** Rotations **//////////////////////////
+          
+          if(isRootLeft){ 
+              if(ele>root->data){//LR- recolour child and gp
+                leftRotate(parent);
+                 performedDoubleRotation=true;
                 }
+              rightRotate(grandParent);//LL - recolour parent and gp
             }
+          else
+          {
+            if(ele<root->data){//RL - recolour child and gp
+              rightRotate(parent);
+              performedDoubleRotation=true;
+            }
+            leftRotate(grandParent); //RR - recolour parent and gp
+          }
+          
+          ////////////////**  Recolouring **/////////////////////////////////
+          
+          if(performedDoubleRotation) //only for double rotation child node is at the top, or else parent node is at the top
+              child->colour=0;
+          else
+              parent->colour=0;
+          grandParent->colour=1; //irrespective of any case gp is recoloured
         }
     }
-
-
 }
 
 int minValue(myNode root){
@@ -399,3 +380,70 @@ int main(){
 	return root;
 }*/
 
+////////////////////////
+//In insertion function logic to solve double red problem
+////////////////////////
+
+// if(root->colour==1 && ((root->right!=NULL && root->right->colour==1) ||(root->left!=NULL && root->left->colour==1))){ // double red problem----here root is parent
+        // if(root->parent->left==root)// root is left child
+        // {
+        //     if(root->parent->right!=NULL && root->parent->right->colour==1) //red sibling
+        //     {
+        //         //recolour parent, sibling, and grandparent(if not root)
+        //         root->colour=0;
+        //         root->parent->right->colour=0;
+        //         if(root->parent->parent!=NULL)
+        //             root->parent->colour=1;
+        //             // root->parent->colour=(root->parent->colour+1)%2;
+        //     }
+        //     else{ //black sibling or null sibling
+        //         //reorganize using rotation (LL or LR)  and recolour
+        //         if(ele<root->data) //LL
+        //         {
+        //             rightRotate(root->parent);
+        //             //recolour parent and grandparent
+        //             root->colour=0;
+        //             root->right->colour=1;
+        //         }
+        //         else  //LR
+        //         {
+        //             leftRotate(root);
+        //             rightRotate(root->parent->parent);
+        //             //recolour child and grandparent
+        //             root->parent->colour=0;
+        //             root->parent->right->colour=1;
+        //         }
+        //     }
+        // }
+        // else{ // root is right child
+        //     if(root->parent->left!=NULL && root->parent->left->colour==1) //red sibling
+        //     {
+        //         //recolour parent, sibling, and grandparent(if not root)
+        //         root->colour=0;
+        //         root->parent->left->colour=0;
+        //         if(root->parent->parent!=NULL)
+        //         {
+        //             root->parent->colour=1;
+        //         }
+        //     }
+        //     else{ //black sibling or null sibling
+        //         //reorganize using rotation (RR or RL)  and recolour
+        //         if(ele>root->data) //RR
+        //         {
+        //             leftRotate(root->parent);
+        //             //recolour parent and grandparent
+        //             root->colour=0;
+        //             root->left->colour=1;
+        //         }
+        //         else  //RL
+        //         {
+        //             rightRotate(root);
+        //             leftRotate(root->parent->parent);
+        //             //recolour child and grandparent
+        //             root->parent->colour=0;
+        //             root->parent->left->colour=1;
+
+        //         }
+        //     }
+        // }
+    // }
