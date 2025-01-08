@@ -142,22 +142,116 @@ int minValue(myNode root){
 		minValue(root->left);
 }
 
+void fixBlackHeightViolation(myNode root){
+        myNode parent=root->parent;
+        bool isRootLeft=false;
+        myNode sibling=NULL;
+        int curNodeColour=root->colour;
+
+      //case 1, root->colour=1 , red node, only delete node, skip if condition
+      //case 2, if node is root node and is double black then make it single black, so here keep it unchanged, nothing to do just skip if condition
+      if(parent!=NULL)
+      {
+        if(parent->left==root)
+        {
+          parent->left=NULL;
+          isRootLeft=true;
+        }
+        else
+          parent->right=NULL;
+        
+        sibling=isRootLeft?parent->right:parent->left;
+
+        //case3-6, also case-2 got covered with outer if condition for parent
+        if(root->colour==0)
+        {
+          //case 4, red sibling (red sibling will only have black children ,even if its null children)
+          if(sibling->colour=1)
+          {
+            //make sibling black
+            // make parent red
+              sibling->colour=0;
+              parent->colour=1;
+              //rotate parent in the direction of db
+              if(isRootLeft) //RR case
+                leftRotate(parent);
+              else
+                rightRotate(parent); //LL case
+              
+              //after rotation check db case on root
+              fixBlackHeightViolation(root);
+          }
+          //case-3,5,6
+          else
+          {
+            //case3, black sibling with black children
+          //there will always be a black/red sibling for a black node, no need to check for null
+            myNode nearChild=isRootLeft?sibling->left:sibling->right;
+            myNode farChild=isRootLeft?sibling->right:sibling->left;
+            
+            //case-3 black sibling with both children black/NULL
+            if(nearChild!=NULL && nearChild->colour==0 && farChild!=NULL && farChild->colour==0)
+            {
+              //make sibling red
+              sibling->colour=1;
+              // add black to parent, if db exists fix again, or else exit
+              if(parent->colour=0) //db
+                fixBlackHeightViolation(parent);
+              else //red parent, make it black
+                parent->colour=0;
+            }
+            
+            else{ 
+              //case-5 black sibling with near child red and far child black
+              if(nearChild!=NULL && nearChild->colour==1)
+              {
+                //make sibling red
+                // make near child black
+                  sibling->colour=1;
+                  nearChild->colour=0;
+                  //rotate sibling in the opposite direction of db
+                  if(isRootLeft) //LL case
+                    rightRotate(sibling);
+                  else
+                    leftRotate(sibling); //RR case
+                  
+                 //apply case -6
+              }
+              //case-6 black sibling with far child red and near child black
+              sibling=isRootLeft?parent->right:parent->left;
+              myNode nearChild=isRootLeft?sibling->left:sibling->right;
+              myNode farChild=isRootLeft?sibling->right:sibling->left;
+              if(farChild!=NULL && farChild->colour=1)
+              {
+                //make sibling red
+                // make near child black
+                  sibling->colour=1;
+                  nearChild->colour=0;
+                  //rotate sibling in the opposite direction of db
+                  if(isRootLeft) //LL case
+                    rightRotate(sibling);
+                  else
+                    leftRotate(sibling); //RR case
+                  
+                  //after rotation check db case on root
+                  fixBlackHeightViolation(root);
+              }
+            }
+
+          }
+
+        }
+      }
+}
 
 int deleteNode(myNode root,int key){
-	if(root==NULL){
+	if(root==NULL)
 		return 0;
-	}
 	else if(root->data==key)
 	{
-		if(root->left==NULL || root->right==NULL)
+		if(root->left==NULL && root->right==NULL)
 		{
-		  struct Node* temp=root->left==NULL?root->right:root->left;
-		  if(root->parent->left==root)
-		    root->parent->left=temp;
-		  else
-		      root->parent->right=temp;
-		  if(temp!=NULL)
-		    temp->parent=root->parent;
+      fixBlackHeightViolation(root);
 			free(root);
 			return 1;
 		}
@@ -171,8 +265,6 @@ int deleteNode(myNode root,int key){
 		return deleteNode(root->left,key);
 	else
 		return deleteNode(root->right,key);
-		
-	
 }
 
 void treeInsertion(myNode* root,int ele){
@@ -180,7 +272,6 @@ void treeInsertion(myNode* root,int ele){
   {
     *root=createNode(ele);
     (*root)->colour=0;
-    
   }
   else
     insertNode(*root,ele);
@@ -224,9 +315,9 @@ void search(myNode root,int key){
 
 
 void inorderTraversal(myNode root){
-	if(root==NULL){
+	if(root==NULL)
 		return;
-	}
+
 	inorderTraversal(root->left);
 	printf("%d ",root->data);
 	inorderTraversal(root->right);
