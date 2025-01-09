@@ -135,39 +135,42 @@ void insertNode(myNode root,int ele){
     }
 }
 
-int minValue(myNode root){
+int inorderSuccessor(myNode root){
 	if(root->left==NULL)
 		return root->data;
 	else
-		minValue(root->left);
+		inorderSuccessor(root->left);
+}
+
+int inorderPredecessor(myNode root){
+	if(root->right==NULL)
+		return root->data;
+	else
+		inorderPredecessor(root->right);
 }
 
 void fixBlackHeightViolation(myNode root){
+        printf("\nentered");
         myNode parent=root->parent;
         bool isRootLeft=false;
         myNode sibling=NULL;
         int curNodeColour=root->colour;
 
-      //case 1, root->colour=1 , red node, only delete node, skip if condition
-      //case 2, if node is root node and is double black then make it single black, so here keep it unchanged, nothing to do just skip if condition
+     
       if(parent!=NULL)
       {
-        if(parent->left==root)
-        {
-          parent->left=NULL;
-          isRootLeft=true;
-        }
-        else
-          parent->right=NULL;
-        
+        isRootLeft=parent->left==root?true:false;
         sibling=isRootLeft?parent->right:parent->left;
-
+        
+         //case 1, root->colour=1 , red node, only delete node, skip if condition
+        //case 2, if node is root node and is double black then make it single black, so here keep it unchanged, nothing to do just skip if condition
         //case3-6, also case-2 got covered with outer if condition for parent
-        if(root->colour==0)
+        if(curNodeColour==0)
         {
           //case 4, red sibling (red sibling will only have black children ,even if its null children)
-          if(sibling->colour=1)
+          if(sibling->colour==1)
           {
+              printf("\ncase4");
             //make sibling black
             // make parent red
               sibling->colour=0;
@@ -177,9 +180,10 @@ void fixBlackHeightViolation(myNode root){
                 leftRotate(parent);
               else
                 rightRotate(parent); //LL case
-              
+               printf("\ncase4 complete");
               //after rotation check db case on root
-              fixBlackHeightViolation(root);
+            //   fixBlackHeightViolation(root);
+               printf("\ncase4 fully complete");
           }
           //case-3,5,6
           else
@@ -188,10 +192,12 @@ void fixBlackHeightViolation(myNode root){
           //there will always be a black/red sibling for a black node, no need to check for null
             myNode nearChild=isRootLeft?sibling->left:sibling->right;
             myNode farChild=isRootLeft?sibling->right:sibling->left;
-            
+            int ncColour=nearChild==NULL?0:nearChild->colour;
+            int fcColour=farChild==NULL?0:farChild->colour;
             //case-3 black sibling with both children black/NULL
-            if(nearChild!=NULL && nearChild->colour==0 && farChild!=NULL && farChild->colour==0)
+            if(ncColour==0 && fcColour==0)
             {
+                printf("\ncase3");
               //make sibling red
               sibling->colour=1;
               // add black to parent, if db exists fix again, or else exit
@@ -203,12 +209,14 @@ void fixBlackHeightViolation(myNode root){
             
             else{ 
               //case-5 black sibling with near child red and far child black
-              if(nearChild!=NULL && nearChild->colour==1)
+              if(ncColour==1 && fcColour==0)
               {
+                  printf("\ncase5");
                 //make sibling red
                 // make near child black
                   sibling->colour=1;
-                  nearChild->colour=0;
+                  if(nearChild!=NULL)
+                    nearChild->colour=0;
                   //rotate sibling in the opposite direction of db
                   if(isRootLeft) //LL case
                     rightRotate(sibling);
@@ -221,27 +229,33 @@ void fixBlackHeightViolation(myNode root){
               sibling=isRootLeft?parent->right:parent->left;
               myNode nearChild=isRootLeft?sibling->left:sibling->right;
               myNode farChild=isRootLeft?sibling->right:sibling->left;
-              if(farChild!=NULL && farChild->colour=1)
+              if(fcColour==1) //covers two red child to black sibling also
               {
-                //make sibling red
-                // make near child black
-                  sibling->colour=1;
-                  nearChild->colour=0;
-                  //rotate sibling in the opposite direction of db
-                  if(isRootLeft) //LL case
-                    rightRotate(sibling);
+                  printf("\ncase6");
+                //swap colour of parent and sibling
+                //make farchild black
+                  sibling->colour=parent->colour;
+                  parent->colour=0; // since it is black sibling
+                  if(farChild!=NULL)
+                    farChild->colour=0;
+
+                //rotate parent in db direction
+                  if(isRootLeft) 
+                    leftRotate(parent);
                   else
-                    leftRotate(sibling); //RR case
+                    rightRotate(parent); 
                   
-                  //after rotation check db case on root
-                  fixBlackHeightViolation(root);
+                  // fixBlackHeightViolation(root);
               }
             }
 
           }
 
         }
+        else
+            printf("\ncase1 or case 2");
       }
+      
 }
 
 int deleteNode(myNode root,int key){
@@ -251,14 +265,27 @@ int deleteNode(myNode root,int key){
 	{
 		if(root->left==NULL && root->right==NULL)
 		{
+		    printf("\nenter checking");
       fixBlackHeightViolation(root);
+      printf("\nexit checking");
+      if(root->parent->left==root)
+          root->parent->left=NULL;
+        else
+          root->parent->right=NULL;
 			free(root);
 			return 1;
 		}
 		else
-		{	
-			root->data=minValue(root->right);
-			return deleteNode(root->right,root->data);
+		{	if(root->right!=NULL)
+			{ 
+			    root->data=inorderSuccessor(root->right);
+			    return deleteNode(root->right,root->data);
+			}
+			else
+			{
+			    root->data=inorderPredecessor(root->left);
+			    return deleteNode(root->left,root->data);
+			}
 		}
 	}
 	else if(key<root->data)
@@ -293,9 +320,9 @@ void treeDeletion(myNode* root,int key)
     result=deleteNode(*root,key);
   
   if(result)
-    printf("Key %d found. Delete sucessful\n",key);
+    printf("\nKey %d found. Delete sucessful\n",key);
   else
-    printf("Key not found. Delete unsucessful\n");
+    printf("\nKey not found. Delete unsucessful\n");
     
   while((*root)->parent!=NULL)
 		  *root=(*root)->parent;
@@ -396,7 +423,8 @@ myNode inputFromFile(const char* filename){
 int main(){
 	struct timespec startTime,endTime;
 	double timeTaken;
-
+    int key=15;
+    
 	clock_gettime(CLOCK_MONOTONIC,&startTime);
 	myNode root=inputFromFile("case40.txt");
 	clock_gettime(CLOCK_MONOTONIC,&endTime);
@@ -406,7 +434,7 @@ int main(){
 	
 	
 	clock_gettime(CLOCK_MONOTONIC,&startTime);
-	search(root,5);
+	search(root,key);
 	clock_gettime(CLOCK_MONOTONIC,&endTime);
 	
 	timeTaken=(endTime.tv_sec-startTime.tv_sec)*1e6+(endTime.tv_nsec-startTime.tv_nsec)/1e3;
@@ -422,14 +450,15 @@ int main(){
 	printf("\nTime taken for inorder traversal is %lf microseconds\n",timeTaken);
 
   // treePrinter(root);
-  // levelOrder(root);
-// 	clock_gettime(CLOCK_MONOTONIC,&startTime);		
-// 	deleteNode(root,5);
-// 	clock_gettime(CLOCK_MONOTONIC,&endTime);
-	
-// 	timeTaken=(endTime.tv_sec-startTime.tv_sec)*1e6+(endTime.tv_nsec-startTime.tv_nsec)/1e3;
-// 	printf("\nTime taken for deleting is %lf microseconds\n",timeTaken);
-	
+   levelOrder(root);
+	clock_gettime(CLOCK_MONOTONIC,&startTime);		
+	treeDeletion(&root,key);
+// 	treeDeletion(&root,44);
+	clock_gettime(CLOCK_MONOTONIC,&endTime);
+	levelOrder(root);
+	timeTaken=(endTime.tv_sec-startTime.tv_sec)*1e6+(endTime.tv_nsec-startTime.tv_nsec)/1e3;
+	printf("\nTime taken for deleting is %lf microseconds\n",timeTaken);
+
 	//printf("\nInorder sequence is:\n");
 	//inorderTraversal(root);
 	printf("\n");
