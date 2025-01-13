@@ -112,9 +112,9 @@ myNode deleteNode(myNode root,int key){
 		printf("Key %d found. Delete sucessful\n",key);
 	}
 	else if(key<root->data)
-		root=deleteNode(root->left,key);
+		root->left=deleteNode(root->left,key);
 	else
-		root=deleteNode(root->right,key);
+		root->right=deleteNode(root->right,key);
 	return root;
 }
 

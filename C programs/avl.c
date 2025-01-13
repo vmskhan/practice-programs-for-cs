@@ -1,4 +1,5 @@
 // level order insert nodes in input file to check any avl tree
+//avl implementation using only recursion and returning pointer in recursion
 #include<stdio.h>
 #include<stdlib.h>
 #include<time.h>
@@ -31,98 +32,73 @@ int getMaxSubtreeHeight(myNode root) {
 }
 
 int getBalanceFactor(myNode root){
-    if(root!=NULL)
-    {
-        int a=getNodeheight(root->left);
-        int b=getNodeheight(root->right);
-        return a-b;
-    }
-    return 0;
+    int a=getNodeheight(root->left);
+    int b=getNodeheight(root->right);
+    return a-b;
 }
 
-void rightRotate(myNode* x){
-    myNode y = (*x)->left;
+myNode rightRotate(myNode x){
+    myNode y = x->left;
 
-    (*x)->left = y->right;
-    y->right = *x;
+    x->left = y->right;
+    y->right = x;
    
 
-    (*x)->height = getMaxSubtreeHeight(*x) + 1;
+    x->height = getMaxSubtreeHeight(x) + 1;
     y->height = getMaxSubtreeHeight(y) + 1;
-     *x=y;
+    return y;
 }
 
-void leftRotate(myNode* x){
-    myNode y = (*x)->right;
+myNode leftRotate(myNode x){
+    myNode y = x->right;
 
-    (*x)->right = y->left;
-    y->left = *x;
+    x->right = y->left;
+    y->left = x;
     
 
-    (*x)->height = getMaxSubtreeHeight(*x) + 1;
+    x->height = getMaxSubtreeHeight(x) + 1;
     y->height = getMaxSubtreeHeight(y) + 1;
-    *x=y;
+    return y;
 }
 
 
-void insert(myNode* root, int ele){
+myNode insert(myNode root, int ele){
 
-    if(*root == NULL){
-        *root=createNode(ele);
-        return;
-    }
-    else if(ele < (*root)->data){
-        insert(&(*root)->left,ele);
-    }
-    else if(ele > (*root)->data){
-        insert(&(*root)->right,ele);
+    if(root == NULL)
+        return createNode(ele);
+    else if(ele < root->data)
+        root->left=insert(root->left,ele);
+    else if(ele > root->data){
+        root->right=insert(root->right,ele);
     }
     
-    (*root)->height=getMaxSubtreeHeight(*root)+1;
-    int balanceFactor=getBalanceFactor(*root);
+    root->height=getMaxSubtreeHeight(root)+1;
+    int balanceFactor=getBalanceFactor(root);
     
     if(balanceFactor>1)
     {
-        if((*root)->left->data<ele)   //LR
-            leftRotate(&(*root)->left);
-        rightRotate(root); //LL
+        if(root->left->data<ele)   //LR
+            root->left=leftRotate(root->left);
+        root=rightRotate(root); //LL
     }
     else if(balanceFactor<-1)
     {
-        if((*root)->right->data>ele)  //RL
-            rightRotate(&(*root)->right);
-        leftRotate(root);  //RR
+        if(root->right->data>ele)  //RL
+            root->right=rightRotate(root->right);
+        root=leftRotate(root);  //RR
     }
-
-    // if(balanceFactor>1 && (*root)->left->data>ele) //LL
-    // {
-    //     rightRotate(root);
-    // }
-    // else if(balanceFactor<-1 && (*root)->right->data<ele) //RR
-    // {
-    //     leftRotate(root);
-    // }
-    // else if(balanceFactor>1 && (*root)->left->data<ele) //LR
-    // {
-    //     leftRotate(&(*root)->left);
-    //     rightRotate(root);
-    // }
-    // else if(balanceFactor<-1 && (*root)->right->data>ele) //RL
-    // {
-    //     rightRotate(&(*root)->right);
-    //     leftRotate(root);
-    // }
+    return root;
 }
 
-int search(myNode root, int key){
+void search(myNode root, int key){
     if(root == NULL)
-        return 0;
+        printf("\nKey %d not found",key);
     else if(root->data == key)
-        return 1;
+        printf("\nKey %d found",key);
     else if(root->data > key)
-        return search(root->left,key);
+        search(root->left,key);
     else 
-        return search(root->right,key);
+        search(root->right,key);
 }
 
 
@@ -134,86 +110,48 @@ int getInorderSuccessor(myNode root){
         return getInorderSuccessor(root->left);
 }
 
-int deleteNode(myNode* root,int key){
-    int res=0;
-    if(*root==NULL)
-      return 0;
-    else if((*root)->data==key)
+myNode deleteNode(myNode root,int key){
+    if(root==NULL){
+      printf("\nKey %d not found. Delete unsuccessful",key);
+        return root;
+    }
+    else if(root->data==key)
     {
-        // printf("%d yes %d",(*root)->data,key);
-        if((*root)->left==NULL || (*root)->right==NULL) //no child and single child cases combined
+        if(root->left==NULL || root->right==NULL) //no child and single child cases combined
         {
-            myNode temp=(*root)->left!=NULL?(*root)->left:(*root)->right;
-            free(*root);
-            *root=temp;
-            return 1;
+            myNode temp=root->left!=NULL?root->left:root->right;
+            free(root);
+            root=temp;
+            printf("\nKey found. Delete successful");
+            return root;
         }
         else{
-            (*root)->data=getInorderSuccessor((*root)->right);
-            res=deleteNode(&(*root)->right,(*root)->data);
+            root->data=getInorderSuccessor(root->right);
+            root->right=deleteNode(root->right,root->data);
         }
     }
-    else if(key<(*root)->data)
-         res=deleteNode(&(*root)->left,key);
+    else if(key<root->data)
+         root->left=deleteNode(root->left,key);
     else
-        res= deleteNode(&(*root)->right,key);
+        root->right=deleteNode(root->right,key);
 
-    (*root)->height=getMaxSubtreeHeight(*root)+1;
-    int balanceFactor=getBalanceFactor(*root);
+    root->height=getMaxSubtreeHeight(root)+1;
+    int balanceFactor=getBalanceFactor(root);
     
     if(balanceFactor>1)
     {
-        if(getBalanceFactor((*root)->left)<0)   //LR
-            leftRotate(&(*root)->left);
-        rightRotate(root); //LL
+        if(getBalanceFactor(root->left)<0)   //LR
+            root->left=leftRotate(root->left);
+        root=rightRotate(root); //LL
     }
     else if(balanceFactor<-1)
     {
-        if(getBalanceFactor((*root)->right)>=0)  //RL
-            rightRotate(&(*root)->right);
-        leftRotate(root);  //RR
+        if(getBalanceFactor(root->right)>=0)  //RL
+            root->right=rightRotate(root->right);
+        root=leftRotate(root);  //RR
     }
-    return res;    
+    return root;    
 }
-
-
-int getDepth(myNode root)
-{
-  if(root==NULL)
-    return 0;
-  int left=getDepth(root->left);
-  int right=getDepth(root->right);
-  return 1+(left>right?left:right);
-}
-
-void currentlevel(myNode root, int level)
-{
-    if (root != NULL) 
-    {
-        if (level == 1)
-            printf("%d ",root->data);
-        else if (level > 1) 
-        { 
-            currentlevel(root->left, level-1); 
-            currentlevel(root->right, level-1);
-        }			
-    }
-    else if(level==1)
-      printf("Nl ");
-}
-
-void levelOrder(myNode root){
-  
-   int depth=getDepth(root);
-    /* Calling current level function, by passing levels one by one. */
-    printf("\n");
-    for(int i = 1; i <= depth; i++)      
-    {
-        currentlevel(root,i);
-        printf("\n");
-    }
-}
-
 
 void inorder(myNode root){
     if(root == NULL)
@@ -237,61 +175,89 @@ myNode insertFromFile(const char* filename) {
         // if((int)num==32)
         //  continue;
         // printf("Scanned number: %d\n", num);
-        insert(&root, num);
+        root=insert(root, num);
     }
     fclose(file);
     return root;
 }
 
+void printTime(struct timespec startTime, struct timespec endTime,char* operation)
+{
+    double timeTaken=(endTime.tv_sec-startTime.tv_sec)*1e6+(endTime.tv_nsec-startTime.tv_nsec)/1e3;
+	printf("\nTime taken for %s is %lf microseconds\n",operation,timeTaken);
+}
+
+
 int main(){
   
      const char* filename = "case40.txt";
-     int key=65;
-     int result=0;
-     struct timespec start, end;
-     double time_taken;
+     int key=15;
+     struct timespec startTime, endTime;
      
-     clock_gettime(CLOCK_MONOTONIC, &start);
+     clock_gettime(CLOCK_MONOTONIC, &startTime);
      myNode root = insertFromFile(filename);
-	 clock_gettime(CLOCK_MONOTONIC, &end);
-	 time_taken = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
-	 printf("\nTime taken for insertion: %lf microseconds\n", time_taken);
+	 clock_gettime(CLOCK_MONOTONIC, &endTime);
+     printTime(startTime,endTime,"Insertion");
 	 
 	 
      printf("Inorder Traversal: ");
-     clock_gettime(CLOCK_MONOTONIC, &start);
+     clock_gettime(CLOCK_MONOTONIC, &startTime);
      inorder(root);
-   	 clock_gettime(CLOCK_MONOTONIC, &end);
+   	 clock_gettime(CLOCK_MONOTONIC, &endTime);
      printf("\n");
      
-   	 time_taken = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
-	 printf("\nTime taken for inoder traversal: %lf microseconds\n", time_taken);
+   	 printTime(startTime,endTime,"Inorder travesal");
 
 	
-	 clock_gettime(CLOCK_MONOTONIC, &start);
-     result=search(root, key);
-     clock_gettime(CLOCK_MONOTONIC, &end);
-     
-     if (result) 
-         printf("\nKey %d found",key);
-     else
-         printf("\nKey %d not found",key);
+	 clock_gettime(CLOCK_MONOTONIC, &startTime);
+     search(root, key);
+     clock_gettime(CLOCK_MONOTONIC, &endTime);
 
-     time_taken = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
-     printf("\nTime taken for searching: %lf microseconds\n", time_taken);
+     printTime(startTime,endTime,"searching");
 
     //  levelOrder(root); 
-     clock_gettime(CLOCK_MONOTONIC, &start);
-     result=deleteNode(&root,key);
-	 clock_gettime(CLOCK_MONOTONIC, &end);
-// 	 levelOrder(root);
-	 if (result) 
-         printf("\nKey %d found. Delete successful",key);
-     else
-         printf("\nKey %d not found. Delete unsuccessful",key);
-	 
-     time_taken = (end.tv_sec - start.tv_sec) * 1e6 + (end.tv_nsec - start.tv_nsec) / 1e3;
-     printf("\nTime taken for deletion: %lf microseconds\n", time_taken);
+     clock_gettime(CLOCK_MONOTONIC, &startTime);
+     root=deleteNode(root,key);
+	 clock_gettime(CLOCK_MONOTONIC, &endTime);
+	//  levelOrder(root);
+    printTime(startTime,endTime,"Deletion");
 
      return 0;
 }
+
+// int getDepth(myNode root)
+// {
+//   if(root==NULL)
+//     return 0;
+//   int left=getDepth(root->left);
+//   int right=getDepth(root->right);
+//   return 1+(left>right?left:right);
+// }
+
+// void currentlevel(myNode root, int level)
+// {
+//     if (root != NULL) 
+//     {
+//         if (level == 1)
+//             printf("%d ",root->data);
+//         else if (level > 1) 
+//         { 
+//             currentlevel(root->left, level-1); 
+//             currentlevel(root->right, level-1);
+//         }			
+//     }
+//     else if(level==1)
+//       printf("Nl ");
+// }
+
+// void levelOrder(myNode root){
+  
+//    int depth=getDepth(root);
+//     /* Calling current level function, by passing levels one by one. */
+//     printf("\n");
+//     for(int i = 1; i <= depth; i++)      
+//     {
+//         currentlevel(root,i);
+//         printf("\n");
+//     }
+// }

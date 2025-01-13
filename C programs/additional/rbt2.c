@@ -1,4 +1,4 @@
-
+//nmc code
 #include <stdio.h>
 #include <stdlib.h>
 #include<time.h>
@@ -213,6 +213,52 @@ void inputFromFile(const char* filename){
 	}
 }
 
+
+
+int getDepth(struct node* root)
+{
+  if(root==NULL)
+    return 0;
+  int left=getDepth(root->l);
+  int right=getDepth(root->r);
+  return 1+(left>right?left:right);
+}
+
+void currentlevel(struct node* root, int level)
+{
+    if (root != NULL) 
+    {
+        if (level == 1)
+        {
+            printf("%d", root->d);
+            if(root->c)
+              printf("R ");
+            else
+              printf("B ");
+        }
+        else if (level > 1) 
+        { 
+            currentlevel(root->l, level-1); 
+            currentlevel(root->r, level-1);
+        }			
+    }
+    else{
+      printf("Nl ");
+    }
+}
+
+void levelOrder(struct node* root){
+  
+   int depth=getDepth(root);
+    /* Calling current level function, by passing levels one by one. */
+    printf("\n");
+    for(int i = 1; i <= depth; i++)      
+    {
+        currentlevel(root,i);
+        printf("\n");
+    }
+}
+
 // driver code
 int main()
 {
@@ -220,7 +266,7 @@ int main()
 	double timeTaken;
 
 	clock_gettime(CLOCK_MONOTONIC,&startTime);
-    inputFromFile("case10.txt");
+    inputFromFile("case40.txt");
     clock_gettime(CLOCK_MONOTONIC,&endTime);
     
     timeTaken=(endTime.tv_sec-startTime.tv_sec)*1e6+(endTime.tv_nsec-startTime.tv_nsec)/1e3;
@@ -235,7 +281,7 @@ int main()
 
     timeTaken=(endTime.tv_sec-startTime.tv_sec)*1e6+(endTime.tv_nsec-startTime.tv_nsec)/1e3;
 	printf("\nTime taken for inorder traversal is %lf microseconds\n",timeTaken);
-    
+    levelOrder(root);
     clock_gettime(CLOCK_MONOTONIC,&startTime);
 	search(root,60);
 	clock_gettime(CLOCK_MONOTONIC,&endTime);
