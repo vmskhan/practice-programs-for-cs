@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include<time.h>
 
 typedef struct SplayTreeNode {
     int key;
@@ -151,30 +152,93 @@ void inorder(SplayTreeNode* root) {
     }
 }
 
+
+int getDepth(SplayTreeNode* root)
+{
+  if(root==NULL)
+    return 0;
+  int left=getDepth(root->left);
+  int right=getDepth(root->right);
+  return 1+(left>right?left:right);
+}
+
+void currentlevel(SplayTreeNode* root, int level)
+{
+    if (root != NULL) 
+    {
+        if (level == 1)
+            printf("%d ", root->key);
+        else if (level > 1) 
+        { 
+            currentlevel(root->left, level-1); 
+            currentlevel(root->right, level-1);
+        }			
+    }
+    else if(level==1){
+      printf("Nl ");
+    }
+}
+
+void levelOrder(SplayTreeNode* root){
+  
+   int depth=getDepth(root);
+    /* Calling current level function, by passing levels one by one. */
+    printf("\n");
+    for(int i = 1; i <= depth; i++)      
+    {
+        currentlevel(root,i);
+        printf("\n");
+    }
+}
+
+SplayTreeNode* inputFromFile(const char* filename){
+	FILE* fptr=fopen(filename,"r");
+	int num=0;
+	SplayTreeNode* root=NULL;
+	if(fptr==NULL){
+		printf("Unable to open file");
+		exit(0);
+	}
+	while(fscanf(fptr,"%d",&num)==1)
+			root=insert(root,num);   
+			
+	return root;
+}
+
+void printTime(struct timespec startTime, struct timespec endTime,char* operation)
+{
+    double timeTaken=(endTime.tv_sec-startTime.tv_sec)*1e6+(endTime.tv_nsec-startTime.tv_nsec)/1e3;
+	printf("\nTime taken for %s is %lf microseconds\n",operation,timeTaken);
+}
+
+
 int main() {
     SplayTree tree;
     tree.root = NULL;
+    struct timespec startTime,endTime;
+    
+    clock_gettime(CLOCK_MONOTONIC,&startTime);
+	tree.root=inputFromFile("case10.txt");
+	clock_gettime(CLOCK_MONOTONIC,&endTime);
+    printTime(startTime,endTime,"Insertion");
 
-    // Inserting nodes into the Splay Tree
-    tree.root = insert(tree.root, 10);
-    tree.root = insert(tree.root, 20);
-    tree.root = insert(tree.root, 5);
-    tree.root = insert(tree.root, 15);
-
-    printf("In-order traversal after insertion: ");
-    inorder(tree.root);
-    printf("\n");
-
-    // Searching for a node
-    tree.root = search(tree.root, 5);
-    printf("In-order traversal after searching for 5: ");
-    inorder(tree.root);
-    printf("\n");
-
-    // Deleting a node
+    
+    clock_gettime(CLOCK_MONOTONIC,&startTime);
+	tree.root = search(tree.root, 5);
+	clock_gettime(CLOCK_MONOTONIC,&endTime);
+    printTime(startTime,endTime,"searching");
+    
+    levelOrder(tree.root);
+    clock_gettime(CLOCK_MONOTONIC,&startTime);
     tree.root = delete(tree.root, 20);
-    printf("In-order traversal after deleting 20: ");
+	clock_gettime(CLOCK_MONOTONIC,&endTime);
+    printTime(startTime,endTime,"Deletion");
+levelOrder(tree.root);
+    clock_gettime(CLOCK_MONOTONIC,&startTime);
     inorder(tree.root);
+	clock_gettime(CLOCK_MONOTONIC,&endTime);
+    printTime(startTime,endTime,"Inorder Traversal");
+    
     printf("\n");
 
     return 0;
