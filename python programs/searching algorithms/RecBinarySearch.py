@@ -7,10 +7,10 @@ def binarySearch(arr,key,left,right):
 		print('Element '+str(key)+' found at position '+str(mid+1))
 		return
 	elif key<arr[mid]:
-	    binarySearch(arr,key,left,mid-1)
+		binarySearch(arr,key,left,mid-1)
 	else:
-	    binarySearch(arr,key,mid+1,right)
-		
+		binarySearch(arr,key,mid+1,right)
+
 if __name__=="__main__":
     numList=[0,1,5,6,8,10,23,34,54,86,87,123]
     print('Elements of the list are:')
