@@ -190,7 +190,7 @@ void printTime(struct timespec startTime, struct timespec endTime,char* operatio
 
 int main(){
   
-     const char* filename = "case40.txt";
+     const char* filename = "InputCases/case40.txt";
      int key=15;
      struct timespec startTime, endTime;
      
